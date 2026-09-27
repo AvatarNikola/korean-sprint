@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0d14">
+<title>한국어 7일 스프린트</title>
+<style>
+:root{--bg:#090c12;--panel:#101722;--panel2:#151e2c;--line:#2d3a52;--muted:#8d98aa;--text:#f4f7fb;--accent:#7d57e8;--good:#49d18c;--bad:#f16d82;--warn:#f2bf59}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% -15%,#211a38 0,#0b1018 40%,#090c12 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+.app{max-width:900px;margin:auto;padding:18px 14px 42px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+h1{font-size:29px;margin:0;letter-spacing:-.7px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 11px;font-size:12px;white-space:nowrap}
+.homeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:16px}
+.dayCard{border:1px solid var(--line);background:rgba(16,23,34,.92);border-radius:18px;padding:14px}
+.dayCard.done{border-color:#29684e}.dayCard.active{border-color:#815fe6;background:#17162a}
+.dayCard h3{margin:0 0 5px;font-size:16px}.dayTopic{color:#c7d1df;font-size:12px;line-height:1.4}.dayStats{color:var(--muted);font-size:11px;margin-top:9px}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.primary,.secondary,.danger{border-radius:14px;padding:12px 14px;font-weight:900}
+.primary{border:0;background:var(--accent);color:#fff}.secondary{border:1px solid var(--line);background:var(--panel);color:#dde5ef}.danger{border:1px solid #633342;background:#24141a;color:#ffb0bb}
+.screen{display:none}.screen.active{display:block}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.toolbar select{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--line);border-radius:13px;color:#fff;padding:11px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:11px}.stat b{display:block;font-size:21px}.stat span{font-size:11px;color:var(--muted)}
+.progress{height:8px;background:#151d29;border-radius:999px;overflow:hidden;margin:10px 0 14px}.progress>div{height:100%;width:0;background:linear-gradient(90deg,#7f59e9,#42c889)}
+.card{background:linear-gradient(150deg,#172337,#101722 65%,#19142d);border:1px solid #35455f;border-radius:25px;padding:20px;min-height:420px;box-shadow:0 18px 60px #0005}
+.badge{display:inline-block;border:1px solid #3a4961;border-radius:999px;background:#182235;color:#bfc9d8;padding:6px 9px;font-size:11px}
+.counter{float:right;color:#77859b;font-size:11px}
+.timer{margin:9px 0;text-align:center;color:#aab5c7;font-variant-numeric:tabular-nums}
+.prompt{font-size:21px;font-weight:850;line-height:1.45;text-align:center;margin:29px 0 10px}.hint{text-align:center;color:var(--muted);font-size:12px;margin-bottom:15px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:9px}.opt{min-height:54px;background:#111a28;color:#fff;border:1px solid #35435b;border-radius:14px;padding:11px;font-weight:800}.opt.correct{border-color:var(--good);background:#143226;color:#a5f2c4}.opt.wrong{border-color:var(--bad);background:#371820;color:#ffb2bc}
+.answer{width:100%;background:#111a28;border:1px solid #35435b;color:#fff;border-radius:14px;padding:14px;font-size:18px;text-align:center}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.feedback{display:none;margin-top:14px;border:1px solid #35445c;border-radius:15px;background:#0e1520;padding:13px;line-height:1.52}.feedback.show{display:block}
+.good{color:#8ee9b2}.bad{color:#ff9eab}.small{font-size:12px;color:#9aa6b8}
+.sectionTitle{font-size:13px;color:#b9c4d4;margin:18px 0 8px;font-weight:900}
+.wordCloud{display:flex;flex-wrap:wrap;gap:7px}.chip{border:1px solid #32415a;background:#121b29;border-radius:999px;padding:7px 9px;font-size:12px}
+.quickBox{border:1px solid #35455e;background:#101a28;border-radius:17px;padding:13px;margin-top:12px}
+.quickBox b{display:block;margin-bottom:4px}
+.reviewRow{border:1px solid var(--line);background:var(--panel);border-radius:15px;padding:12px;margin-top:8px}
+.reviewRow .ko{font-weight:850;font-size:18px}.reviewRow .ru{color:#aab4c3;font-size:12px;margin-top:3px}
+.footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.footer button{flex:1;min-width:145px}
+.homeNote{margin-top:14px;color:#728097;font-size:11px;text-align:center;line-height:1.5}
+.result{display:none;text-align:center;padding-top:22px}.result.show{display:block}.score{font-size:46px;font-weight:900;margin:6px 0}.result p{color:#a7b1c0}
+@media(max-width:600px){.homeGrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.options{grid-template-columns:1fr}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="home" class="screen active">
+  <div class="top">
+    <div><h1>한국어 · 7일 스принт</h1><div class="sub">Твоя задача: перестать собирать фразу по кирпичику.</div></div>
+    <div class="pill" id="overallPill">0/7 дней</div>
+  </div>
+
+  <div class="quickBox">
+    <b>Как занимаемся</b>
+    30–45 минут в день. Старые грамматики идут по спирали каждый день; новые слова — маленькими порциями. Ошибся быстро → отлично, именно это мы и тренируем.
+  </div>
+
+  <div class="sectionTitle">7 дней</div>
+  <div class="homeGrid" id="dayGrid"></div>
+
+  <div class="footer">
+    <button class="secondary" id="mistakesBtn">Повтор ошибок</button>
+    <button class="danger" id="resetBtn">Сбросить прогресс</button>
+  </div>
+  <div class="homeNote">Прогресс хранится в браузере через localStorage. Можно закрыть страницу и вернуться позже.</div>
+</div>
+
+<div id="study" class="screen">
+  <div class="top">
+    <div><h1 id="dayTitle">День 1</h1><div class="sub" id="daySub"></div></div>
+    <button class="secondary" id="homeBtn">← Меню</button>
+  </div>
+  <div class="toolbar">
+    <select id="mode">
+      <option value="mixed">Всё вместе</option>
+      <option value="speed">Быстрые ответы</option>
+      <option value="vocab">Слова</option>
+      <option value="grammar">Грамматика</option>
+    </select>
+    <button class="primary" id="restartBtn">Начать / заново</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sDone">0</b><span>заданий</span></div>
+    <div class="stat"><b id="sAcc">0%</b><span>точность</span></div>
+    <div class="stat"><b id="sTime">00:00</b><span>время</span></div>
+    <div class="stat"><b id="sStreak">0</b><span>дней подряд</span></div>
+  </div>
+  <div class="progress"><div id="pFill"></div></div>
+
+  <div id="studyCard" class="card"></div>
+  <div class="timer" id="timer">00:00</div>
+
+  <div id="result" class="result">
+    <div class="small">День завершён</div>
+    <div id="resScore" class="score">0%</div>
+    <div id="resText"></div>
+    <p id="resTip"></p>
+    <button class="primary" id="againBtn">Пройти ещё раз</button>
+  </div>
+</div>
+
+<div id="review" class="screen">
+  <div class="top"><div><h1>Повтор ошибок</h1><div class="sub">Все места, где ты раньше спотыкался.</div></div><button class="secondary" id="reviewHome">← Меню</button></div>
+  <div id="reviewList"></div>
+</div>
+
+<script>
+const BASE_GRAMMAR=[
+["은/는","тема","저는 학생이에요."],
+["이/가","кто / что","날씨가 좋아요."],
+["을/를","объект","커피를 마셔요."],
+["에","куда / где находится","학교에 가요."],
+["에서","где происходит действие","학교에서 공부해요."],
+["도","тоже / ещё","저도 가요."],
+["안 + V","не делать","안 먹어요."],
+["V-고","и / затем","먹고 가요."],
+["-았/었어요","прошедшее","어제 갔어요."],
+["-(으)ㄹ까요?","предложение","같이 갈까요?"],
+["-네요","заметил / реакция","맛있네요."],
+["이/그/저","этот / тот / вон тот","이 커피 / 그 식당 / 저 공원"]
+];
+const EXTRA=[
+["-고 싶어요","хочу","집에 가고 싶어요."],
+["-(으)ㄹ 수 있어요","могу","한국어를 조금 할 수 있어요."],
+["-(으)ㄹ 거예요","буду / план","내일 공부할 거예요."],
+["-(으)ㄹ게요","обещание","나중에 전화할게요."],
+["-(으)면","если","시간이 있으면 가요."],
+["-아/어서","потому что / поэтому","피곤해서 쉬어요."],
+["-아/어야 돼요","нужно","공부해야 돼요."]
+];
+
+const DAYS=[
+{topic:"Кто? Что? Где?",focus:["누구","뭐","어디","언제","왜","어떻게"],new:["누구","뭐","어디","언제","왜","어떻게","어느","무슨","먼저","아직"]},
+{topic:"Время + прошлое",focus:["오늘","어제","내일","지금","전에","예전에","다음에"],new:["오늘","어제","내일","지금","전에","예전에","다음에","지난주","다음주","요즘"]},
+{topic:"Связки",focus:["그리고","그런데","그래서","그럼","하지만"],new:["그리고","그런데","그래서","그럼","하지만","같이","혼자","조금","많이","정말"]},
+{topic:"Хочу + могу + планы",focus:["-고 싶어요","-(으)ㄹ 수 있어요","-(으)ㄹ 거예요"],new:["원하다","필요하다","계획","약속","준비","가능하다","도와주다","기다리다","찾다","만들다"]},
+{topic:"Если + потому что + нужно",focus:["-(으)면","-아/어서","-아/어야 돼요"],new:["이유","방법","문제","대답","질문","바쁘다","피곤하다","쉬다","끝나다","시작하다"]},
+{topic:"Быт + кусочки слов",focus:["색","맛","-집","-장","-방","-님"],new:["색","맛","빨간색","하늘색","검은색","단맛","짠맛","매운맛","맛집","공장","수영장","찜질방"]},
+{topic:"Финал: быстрые ответы",focus:["вся база"],new:["바로","곧","보통","항상","자주","처음","손님","사장님","선생님","시간","분","시"]}
+];
+
+const WORD_MEANING={
+"누구":"кто","뭐":"что","어디":"где / куда","언제":"когда","왜":"почему","어떻게":"как","어느":"какой / который","무슨":"какой именно / что за","먼저":"сначала","아직":"ещё / пока",
+"오늘":"сегодня","어제":"вчера","내일":"завтра","지금":"сейчас","전에":"до / раньше","예전에":"раньше","다음에":"в следующий раз","지난주":"прошлая неделя","다음주":"следующая неделя","요즘":"в последнее время",
+"그리고":"и / а потом","그런데":"но / кстати","그래서":"поэтому","그럼":"тогда","하지만":"но","같이":"вместе","혼자":"в одиночку","조금":"немного","많이":"много","정말":"реально / правда",
+"원하다":"хотеть","필요하다":"нуждаться","계획":"план","약속":"договорённость / план","준비":"подготовка","가능하다":"быть возможным","도와주다":"помогать","기다리다":"ждать","찾다":"искать","만들다":"делать / создавать",
+"이유":"причина","방법":"способ","문제":"проблема / вопрос","대답":"ответ","질문":"вопрос","바쁘다":"быть занятым","피곤하다":"быть уставшим","쉬다":"отдыхать","끝나다":"заканчиваться","시작하다":"начинаться",
+"색":"цвет","맛":"вкус","빨간색":"красный","하늘색":"голубой","검은색":"чёрный","단맛":"сладкий вкус","짠맛":"солёный вкус","매운맛":"острый вкус","맛집":"хорошее место поесть","공장":"фабрика","수영장":"бассейн","찜질방":"корейская сауна",
+"바로":"сразу / прямо","곧":"скоро","보통":"обычно","항상":"всегда","자주":"часто","처음":"в первый раз","손님":"клиент / гость","사장님":"босс / хозяин","선생님":"учитель","시간":"время","분":"минута","시":"час"
+};
+
+const QUICK=[
+["어제 어디에 갔어요?","Куда ты ходил вчера?","어제 ___에 갔어요."],
+["누구하고 밥을 먹었어요?","С кем ты ел?","___하고 밥을 먹었어요."],
+["지금 뭐 해요?","Что делаешь сейчас?","지금 한국어를 공부해요."],
+["왜 안 가요?","Почему не идёшь?","피곤해서 안 가요."],
+["어디에서 공부해요?","Где учишься?","학교에서 공부해요."],
+["내일 뭐 할 거예요?","Что будешь делать завтра?","내일 학교에 갈 거예요."],
+["같이 갈까요?","Пойдём вместе?","네, 좋아요."],
+["시간이 있으면 뭐 할 거예요?","Что будешь делать, если будет время?","시간이 있으면 친구를 만날 거예요."],
+["한국어를 할 수 있어요?","Можешь говорить по-корейски?","조금 할 수 있어요."],
+["뭐 먹고 싶어요?","Что хочешь поесть?","비빔밥을 먹고 싶어요."]
+];
+
+let state=JSON.parse(localStorage.getItem("kr7_v1")||'{"days":{},"mistakes":[],"lastDay":0,"streak":0}');
+let currentDay=1,queue=[],idx=0,runStarted=0,timerId=null,answered=false;
+
+const $=id=>document.getElementById(id);
+const norm=s=>(s||"").replace(/[?!.,"']/g,"").replace(/\s+/g,"").trim();
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const seconds=(ms)=>Math.max(0,Math.floor(ms/1000));
+function ds(d){if(!state.days[d])state.days[d]={done:0,correct:0,seconds:0,finished:false};return state.days[d]}
+function save(){localStorage.setItem("kr7_v1",JSON.stringify(state))}
+function fmt(s){let m=Math.floor(s/60),x=s%60;return String(m).padStart(2,"0")+":"+String(x).padStart(2,"0")}
+
+function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");scrollTo(0,0)}
+function renderHome(){
+  const done=Object.values(state.days).filter(x=>x.finished).length;
+  $("overallPill").textContent=`${done}/7 дней`;
+  $("dayGrid").innerHTML="";
+  DAYS.forEach((d,i)=>{
+    const n=i+1,s=ds(n),div=document.createElement("div");
+    div.className="dayCard"+(s.finished?" done":"");
+    div.innerHTML=`<h3>День ${n}</h3><div class="dayTopic">${d.topic}</div><div class="dayStats">${s.finished?"✓ завершён":"ещё не пройден"} · ${s.done} заданий · ${s.done?Math.round(s.correct/s.done*100):0}%</div><div class="actions"><button class="primary" data-day="${n}">${s.finished?"Повторить":"Начать"}</button></div>`;
+    div.querySelector("button").onclick=()=>startDay(n);
+    $("dayGrid").appendChild(div);
+  });
+}
+function renderStats(){
+ const s=ds(currentDay),p=s.done?Math.round((s.correct/s.done)*100):0;
+ $("sDone").textContent=s.done;$("sAcc").textContent=p+"%";$("sTime").textContent=fmt(s.seconds);
+ let streak=0;for(let i=currentDay;i>=1;i--){if(ds(i).finished)streak++;else break}$("sStreak").textContent=streak;
+ $("pFill").style.width=(queue.length?idx/queue.length*100:0)+"%";
+}
+function startDay(n){
+ currentDay=n;$("dayTitle").textContent=`День ${n}`;$("daySub").textContent=DAYS[n-1].topic;
+ $("mode").value="mixed";queue=[];idx=0;answered=false;runStarted=Date.now();
+ $("result").classList.remove("show");$("studyCard").style.display="block";$("timer").style.display="block";
+ buildQueue();renderStats();renderQ();clearInterval(timerId);timerId=setInterval(()=>{
+   $("timer").textContent=fmt(Date.now()-runStarted);
+ },250);show("study");
+}
+function buildQueue(){
+ const mode=$("mode").value;const q=[];const d=DAYS[currentDay-1];
+ const allGr=BASE_GRAMMAR.concat(currentDay>=4?EXTRA.slice(0,currentDay-3):[]);
+ const grams=(mode==="vocab"?[]:allGr);
+ if(mode!=="vocab"){
+   grams.forEach(g=>q.push({type:"mc",section:"문법",prompt:`Что означает ${g[0]}?`,options:shuffle([g[1],"тема","время","куда"]),answer:g[1],why:g[2]}));
+ }
+ if(mode!=="grammar"){
+   const words=d.new;
+   words.forEach(w=>{
+     const meaning=WORD_MEANING[w]||w;
+     const ds2=shuffle(Object.values(WORD_MEANING).filter(x=>x!==meaning)).slice(0,3);
+     q.push({type:"mc",section:"단어",prompt:`${w} = ?`,options:shuffle([meaning,...ds2]),answer:meaning,why:`${w} = ${meaning}`});
+   });
+ }
+ if(mode!=="vocab"){
+   const qs=shuffle(QUICK);
+   qs.slice(0, currentDay===7?10:8).forEach(x=>q.push({type:"type",section:"말하기",prompt:x[1]+`<br><span class="small">${x[0]}</span>`,answer:x[2],why:"Сначала скажи фразу вслух, потом напиши её."}));
+ }
+ // 3 spiral questions per day on particles
+ if(mode!=="vocab"){
+   const particleQs=[
+    ["Я учусь в школе.","학교___ 공부해요.","학교에서 공부해요.","에서"],
+    ["Я иду в школу.","학교___ 가요.","학교에 가요.","에"],
+    ["Я ем кофе? Нет, пью кофе.","커피___ 마셔요.","커피를 마셔요.","를"],
+    ["Я тоже иду.","저___ 가요.","저도 가요.","도"],
+    ["Погода хорошая.","날씨___ 좋아요.","날씨가 좋아요.","가"],
+    ["Что касается меня, я студент.","저___ 학생이에요.","저는 학생이에요.","는"]
+   ];
+   shuffle(particleQs).slice(0,Math.min(4,particleQs.length)).forEach(x=>q.push({type:"type",section:"조사",prompt:`${x[0]}<br><span class="small">${x[1]}</span>`,answer:x[2],why:`Ключ: ${x[3]}`}));
+ }
+ if(mode==="speed"){
+   return shuffle(q).slice(0,18);
+ }
+ return shuffle(q);
+}
+function renderQ(){
+ answered=false;renderStats();
+ if(idx>=queue.length){endDay();return}
+ const q=queue[idx],card=$("studyCard");
+ card.innerHTML=`<span class="badge">${q.section}</span><span class="counter">${idx+1}/${queue.length}</span><div class="prompt">${q.prompt}</div><div class="hint">${q.type==="type"?"Сначала попробуй за ~3 секунды. Потом уже думай.":"Не перебирай варианты в голове бесконечно."}</div>`;
+ if(q.type==="mc"){
+   const w=document.createElement("div");w.className="options";
+   shuffle(q.options).forEach(o=>{const b=document.createElement("button");b.className="opt";b.textContent=o;b.onclick=()=>mcAnswer(b,o,q);w.appendChild(b)});card.appendChild(w);
+ }else{
+   const input=document.createElement("input");input.id="ans";input.className="answer";input.autocomplete="off";input.placeholder="Напиши по-корейски";
+   const act=document.createElement("div");act.className="actions";
+   const check=document.createElement("button");check.className="primary";check.textContent="Проверить";
+   const reveal=document.createElement("button");reveal.className="secondary";reveal.textContent="Не знаю";
+   act.append(check,reveal);card.append(input,act);
+   check.onclick=()=>typeAnswer(input.value,q);
+   input.addEventListener("keydown",e=>{if(e.key==="Enter")typeAnswer(input.value,q)});
+   reveal.onclick=()=>{record(false,q);lock();showFeedback(false,`Ответ: <b>${q.answer}</b><br><span class="small">${q.why}</span>`)}
+ }
+}
+function lock(){document.querySelectorAll("#studyCard button,#studyCard input").forEach(x=>x.disabled=true)}
+function addMistake(q){state.mistakes=state.mistakes.filter(x=>x.prompt!==q.prompt);state.mistakes.unshift({day:currentDay,section:q.section,prompt:q.prompt,answer:q.answer,why:q.why});state.mistakes=state.mistakes.slice(0,80)}
+function record(ok,q){
+ const s=ds(currentDay),elapsed=Math.min(seconds(Date.now()-runStarted),45);s.done++;if(ok)s.correct++;s.seconds+=elapsed;
+ if(!ok)addMistake(q);save();renderStats();
+}
+function showFeedback(ok,html){
+ let f=document.createElement("div");f.className="feedback show";
+ f.innerHTML=`<div class="${ok?"good":"bad"}"><b>${ok?"✓ Верно":"✕ Ошибка"}</b></div>${html}<div class="actions"><button class="primary" id="nextBtn">Дальше →</button></div>`;
+ $("studyCard").appendChild(f);$("nextBtn").onclick=()=>{idx++;runStarted=Date.now();$("timer").textContent="00:00";renderQ()};
+}
+function mcAnswer(btn,val,q){
+ if(answered)return;answered=true;const ok=val===q.answer;document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add("correct")});if(!ok)btn.classList.add("wrong");
+ record(ok,q);showFeedback(ok,`${ok?"":"Правильный ответ: <b>"+q.answer+"</b><br>"}<span class="small">${q.why}</span>`);
+}
+function typeAnswer(val,q){
+ if(answered)return;answered=true;const ok=norm(val)===norm(q.answer);lock();record(ok,q);showFeedback(ok,`${ok?"":"Правильный ответ: <b>"+q.answer+"</b><br>"}<span class="small">${q.why}</span>`);
+}
+function endDay(){
+ clearInterval(timerId);const s=ds(currentDay),pct=s.done?Math.round(s.correct/s.done*100):0;s.finished=true;
+ if(state.lastDay===currentDay-1)state.streak=(state.streak||0)+1;else if(state.lastDay!==currentDay)state.streak=1;
+ state.lastDay=currentDay;save();renderStats();
+ $("studyCard").style.display="none";$("timer").style.display="none";$("result").classList.add("show");
+ $("resScore").textContent=pct+"%";$("resText").textContent=`${s.correct} правильных из ${s.done}. Времени: ${fmt(s.seconds)}.`;
+ $("resTip").textContent=pct>=85?"Супер. Завтра делаем упор на скорость.":pct>=70?"Нормально. Ошибки — главная добыча, повторим их.":"Повтори день ещё раз: цель сейчас не скорость результата, а автоматизм.";
+ renderHome();
+}
+function renderReview(){
+ show("review");const box=$("reviewList");
+ if(!state.mistakes.length){box.innerHTML=`<div class="quickBox">Пока ошибок нет. Иди проходи дни 😎</div>`;return}
+ box.innerHTML=state.mistakes.map((x,i)=>`<div class="reviewRow"><div class="small">День ${x.day} · ${x.section}</div><div class="ko">${x.prompt}</div><div class="ru">Ответ: <b>${x.answer}</b></div><div class="small">${x.why||""}</div></div>`).join("");
+}
+$("homeBtn").onclick=()=>{clearInterval(timerId);renderHome();show("home")};
+$("reviewHome").onclick=()=>{renderHome();show("home")};
+$("mistakesBtn").onclick=renderReview;
+$("restartBtn").onclick=startDay.bind(null,currentDay);
+$("againBtn").onclick=()=>startDay(currentDay);
+$("mode").onchange=()=>{clearInterval(timerId);startDay(currentDay)};
+$("resetBtn").onclick=()=>{if(confirm("Сбросить весь прогресс и ошибки?")){state={days:{},mistakes:[],lastDay:0,streak:0};save();renderHome()}};
+renderHome();
+</script>
+</body>
+</html>
